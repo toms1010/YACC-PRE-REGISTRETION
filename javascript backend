@@ -1,0 +1,476 @@
+function doGet(e) {
+  return HtmlService.createHtmlOutputFromFile('page')
+    .setTitle('YACC 2025 - CONNECT')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+function submitRegistration(data) {
+  try {
+    // DEBUG: Log incoming data
+    console.log('Received registration data:', JSON.stringify(data, null, 2));
+    
+    // Server-side validation
+    if (!data.churchName || data.churchName.trim().length < 3) {
+      throw new Error("Church name must be at least 3 characters long.");
+    }
+    if (!data.leaderName || data.leaderName.trim().length < 3) {
+      throw new Error("Leader name must be at least 3 characters long.");
+    }
+    
+    // Leader age validation
+    if (!data.leaderAge || data.leaderAge.toString().trim() === '') {
+      throw new Error("Leader age is required.");
+    }
+    
+    const leaderAgeNum = parseInt(data.leaderAge);
+    if (isNaN(leaderAgeNum) || leaderAgeNum < 1 || leaderAgeNum > 99) {
+      throw new Error("Leader age must be a valid number between 1 and 99.");
+    }
+    
+    // Leader sex validation
+    if (!data.leaderSex || data.leaderSex.toString().trim() === '') {
+      throw new Error("Leader sex is required.");
+    }
+    
+    const validSexValues = ["Male", "Female"];
+    if (!validSexValues.includes(data.leaderSex.toString().trim())) {
+      throw new Error("Leader sex must be Male or Female.");
+    }
+    
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      throw new Error("Invalid email address.");
+    }
+    
+    // Validate leader education with updated categories
+    const validEducationLevels = [
+      "Elementary", 
+      "High School A (First and Second Year)", 
+      "High School B (Third and Fourth Year)", 
+      "High School C (Grade 11 and 12)", 
+      "College A (First and Second Year)", 
+      "College B (Third and Fourth Year)", 
+      "Young Professional", 
+      "Adults: Men, Women and Pastors Combined"
+    ];
+    
+    if (!data.leaderEducation || !validEducationLevels.includes(data.leaderEducation)) {
+      throw new Error("Please select a valid educational level for the leader.");
+    }
+    
+    // Validate leader Facebook name if provided
+    if (data.leaderFb && data.leaderFb.trim().length < 3) {
+      throw new Error("Leader Facebook name must be at least 3 characters if provided.");
+    }
+    
+    // Check for duplicate email
+    var spreadsheetId = "1FhN4LwARglRTEUJVkR26h7vlPfTNBHE3c55YZZxqvPw";
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    
+    // Get or create groups sheet
+    var wsGroups = ss.getSheetByName("groups");
+    if (wsGroups == null) {
+      wsGroups = ss.insertSheet("groups");
+      // Create header row for groups sheet
+      wsGroups.appendRow([
+        "Church Name", "Leader", "Leader Age", "Leader Sex", "Email", 
+        "Contact", "Attendees", "Region", "Leader Education", 
+        "Leader Facebook", "Timestamp", "Payment Proof URL", 
+        "Total Fee", "Registration ID"
+      ]);
+    }
+    
+    // Check for duplicate email
+    var emails = [];
+    var lastRow = wsGroups.getLastRow();
+    if (lastRow > 1) {
+      var emailRange = wsGroups.getRange(2, 5, lastRow - 1, 1); // Column E (Email)
+      emails = emailRange.getValues().flat().filter(email => email !== '');
+    }
+    if (emails.includes(data.email)) {
+      throw new Error("This email is already registered. Please use a different email or contact yacc2025connect@gmail.com.");
+    }
+    
+    // Contact validation
+    var cleanedContact = data.contact.replace(/[-\s]/g, '');
+    if (!cleanedContact || !/^\d{11}$/.test(cleanedContact)) {
+      throw new Error("Contact number must be exactly 11 digits (e.g., 09123456789).");
+    }
+    
+    if (!data.attendees || isNaN(data.attendees) || data.attendees < 1 || data.attendees > 100) {
+      throw new Error("Number of attendees must be between 1 and 100.");
+    }
+    
+    if (!data.region || data.region.trim().length < 3) {
+      throw new Error("Region must be at least 3 characters long.");
+    }
+    
+    // Validate number of members matches attendees
+    var expectedMembers = parseInt(data.attendees) - 1;
+    if (data.members && data.members.length !== expectedMembers) {
+      throw new Error(`Number of members (${data.members.length}) does not match expected (${expectedMembers} members for ${data.attendees} attendees).`);
+    }
+    
+    // Validate members data with updated educational categories
+    const validMemberEducationLevels = [
+      "Nursery/Kinder",
+      "Elementary", 
+      "High School A (First and Second Year)", 
+      "High School B (Third and Fourth Year)", 
+      "High School C (Grade 11 and 12)", 
+      "College A (First and Second Year)", 
+      "College B (Third and Fourth Year)", 
+      "Young Professional", 
+      "Adults: Men, Women and Pastors Combined"
+    ];
+    
+    if (data.members && data.members.length > 0) {
+      data.members.forEach((member, index) => {
+        if (!member.name || member.name.trim().length < 3) {
+          throw new Error(`Member ${index + 1}: Full name must be at least 3 characters.`);
+        }
+        if (!member.age || isNaN(member.age) || member.age < 1 || member.age > 99) {
+          throw new Error(`Member ${index + 1}: Age must be between 1 and 99.`);
+        }
+        if (!member.sex || !["Male", "Female"].includes(member.sex)) {
+          throw new Error(`Member ${index + 1}: Sex must be Male or Female.`);
+        }
+        if (!member.edu || !validMemberEducationLevels.includes(member.edu)) {
+          throw new Error(`Member ${index + 1}: Invalid educational level.`);
+        }
+        if (member.fb && member.fb.trim().length < 3) {
+          throw new Error(`Member ${index + 1}: Facebook name must be at least 3 characters if provided.`);
+        }
+      });
+    }
+
+    // Calculate registration fee
+    const earlyBirdDeadline = new Date('2025-11-30T23:59:59+08:00');
+    const now = new Date();
+    const isEarlyBird = now <= earlyBirdDeadline;
+    let totalFee = 0;
+    
+    // Calculate fee for leader based on age (child or adult pricing)
+    const leaderAge = parseInt(data.leaderAge);
+    totalFee += leaderAge <= 7 ? 350 : (isEarlyBird ? 600 : 750);
+    
+    // Calculate fees for members (children <=7 get fixed ₱350 rate)
+    if (data.members && data.members.length > 0) {
+      data.members.forEach(member => {
+        const age = parseInt(member.age);
+        totalFee += age <= 7 ? 350 : (isEarlyBird ? 600 : 750);
+      });
+    }
+
+    // Get or create members sheet
+    var wsMembers = ss.getSheetByName("members");
+    if (wsMembers == null) {
+      wsMembers = ss.insertSheet("members");
+      wsMembers.appendRow([
+        "Registration ID", "Name", "Age", "Sex", "Educational Level", 
+        "Facebook Name", "Timestamp", "Member Type"
+      ]);
+    }
+
+    // Generate unique registration ID
+    var timestamp = new Date();
+    var registrationId = "YACC" + Utilities.formatDate(timestamp, "Asia/Manila", "yyyyMMddHHmmss");
+
+    // Handle file upload if present
+    var paymentProofUrl = '';
+    if (data.fileContent && data.fileName) {
+      try {
+        // Validate file type
+        var validImageTypes = ['image/jpeg', 'image/png'];
+        if (!validImageTypes.includes(data.fileType)) {
+          throw new Error("Only JPEG or PNG images are allowed for payment proof.");
+        }
+
+        // Validate file size (max 5MB)
+        var base64Content = data.fileContent.split(',')[1];
+        var fileSize = (base64Content.length * 3 / 4) / 1024 / 1024; // Approximate size in MB from base64
+        if (fileSize > 5) {
+          throw new Error("Payment proof file size must not exceed 5MB.");
+        }
+
+        // Get YACC 2025 Uploads folder
+        var folderId = "1nTtMMmSpmzix5S8fwx1_J7yeS7x1fqAk";
+        var folder = DriveApp.getFolderById(folderId);
+        
+        // Create subfolder for the church
+        var churchFolderName = data.churchName.replace(/[^\w\s-]/gi, '') + " - " + registrationId;
+        var churchFolder;
+        try {
+          churchFolder = folder.createFolder(churchFolderName);
+        } catch (e) {
+          // If folder creation fails, use main folder
+          churchFolder = folder;
+        }
+        
+        var blob = Utilities.newBlob(
+          Utilities.base64Decode(base64Content), 
+          data.fileType, 
+          data.fileName
+        );
+        
+        var file = churchFolder.createFile(blob);
+        file.setDescription("Payment Proof uploaded by: " + data.leaderName + " (" + data.email + ") for YACC 2025 Registration");
+        
+        // Make file accessible via link
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        paymentProofUrl = file.getUrl();
+        
+      } catch (fileError) {
+        // Log file error but don't fail the registration
+        console.log("File upload error for " + data.churchName + ": " + fileError.toString());
+        paymentProofUrl = "Upload failed: " + fileError.message;
+      }
+    }
+
+    // Append group info with new fields including leader age and sex
+    var groupRow = [
+      data.churchName,
+      data.leaderName,
+      data.leaderAge, // Leader age
+      data.leaderSex, // Leader sex
+      data.email,
+      cleanedContact,
+      data.attendees,
+      data.region,
+      data.leaderEducation, // Leader education
+      data.leaderFb || '', // Leader Facebook name
+      timestamp,
+      paymentProofUrl,
+      totalFee,
+      registrationId
+    ];
+    wsGroups.appendRow(groupRow);
+    
+    // Get the actual row number for reference
+    var groupRowNum = wsGroups.getLastRow();
+
+    // Append leader as first member with age, sex, education and Facebook data
+    wsMembers.appendRow([
+      registrationId,
+      data.leaderName,
+      data.leaderAge, // Leader age
+      data.leaderSex, // Leader sex
+      data.leaderEducation, // Leader education
+      data.leaderFb || '', // Leader Facebook name
+      timestamp,
+      "Leader"
+    ]);
+
+    // Append all other members
+    if (data.members && data.members.length > 0) {
+      data.members.forEach(member => {
+        wsMembers.appendRow([
+          registrationId,
+          member.name,
+          member.age,
+          member.sex,
+          member.edu,
+          member.fb || '',
+          timestamp,
+          "Member"
+        ]);
+      });
+    }
+
+    // Calculate total attendees count (leader + members)
+    var totalAttendeesCount = 1 + (data.members ? data.members.length : 0);
+    
+    // Update total attendees in summary sheet
+    var wsSummary = ss.getSheetByName("summary");
+    if (wsSummary == null) {
+      wsSummary = ss.insertSheet("summary");
+      wsSummary.appendRow(["Total Registered Churches", "Total Attendees", "Last Updated"]);
+    }
+    
+    // Get current totals
+    var lastRow = wsSummary.getLastRow();
+    var currentChurches = 0;
+    var currentAttendees = 0;
+    
+    if (lastRow > 1) {
+      var totals = wsSummary.getRange(2, 1, 1, 2).getValues()[0];
+      currentChurches = totals[0] || 0;
+      currentAttendees = totals[1] || 0;
+    }
+    
+    // Update totals
+    var newChurches = currentChurches + 1;
+    var newAttendees = currentAttendees + totalAttendeesCount;
+    
+    if (lastRow > 1) {
+      wsSummary.getRange(2, 1, 1, 3).setValues([[newChurches, newAttendees, timestamp]]);
+    } else {
+      wsSummary.appendRow([newChurches, newAttendees, timestamp]);
+    }
+
+    // Auto-resize columns for better readability
+    wsGroups.autoResizeColumns(1, wsGroups.getLastColumn());
+    wsMembers.autoResizeColumns(1, wsMembers.getLastColumn());
+    if (wsSummary) {
+      wsSummary.autoResizeColumns(1, wsSummary.getLastColumn());
+    }
+
+    // Send confirmation email to user
+    var subject = 'YACC 2025 Registration Confirmation - ' + data.churchName;
+    
+    // Include leader age, sex, education and Facebook in members list
+    var membersList = '';
+    if (data.members && data.members.length > 0) {
+      membersList = data.members.map(m => 
+        `- ${m.name} (Age: ${m.age}, ${m.sex}, ${m.edu}${m.fb ? ', FB: ' + m.fb : ''})`
+      ).join('\n    ');
+    }
+    
+    // Add leader to members list with age, sex, education and Facebook
+    membersList = `- ${data.leaderName} (Leader, Age: ${data.leaderAge}, ${data.leaderSex}, ${data.leaderEducation}${data.leaderFb ? ', FB: ' + data.leaderFb : ''})\n    ` + membersList;
+    
+    var paymentProofText = paymentProofUrl && paymentProofUrl.includes('http') ? 
+      `\nPayment Proof Uploaded: Yes\nOur team will verify your payment within 48 hours.` : 
+      '\nPayment Proof: Not uploaded. Please send your payment proof to yacc2025connect@gmail.com.';
+    
+    var message = `
+Thank you for registering for YACC 2025 Panay – CONNECT!
+
+YOUR REGISTRATION DETAILS:
+Church Name: ${data.churchName}
+Leader: ${data.leaderName}
+Leader Age: ${data.leaderAge}
+Leader Sex: ${data.leaderSex}
+Email: ${data.email}
+Contact: ${data.contact}
+Number of Attendees: ${data.attendees}
+Region: ${data.region}
+Leader Education: ${data.leaderEducation}
+${data.leaderFb ? 'Leader Facebook: ' + data.leaderFb : ''}
+Registration ID: ${registrationId}
+Total Fee: ₱${totalFee.toFixed(2)} ${isEarlyBird ? '(Early Bird Rate)' : '(Regular Rate)'}
+
+REGISTERED ATTENDEES:
+${membersList}
+
+${paymentProofText}
+
+EVENT DETAILS:
+Date: December 26–30, 2025
+Venue: Anilao National High School, Anilao, Iloilo
+
+PAYMENT INFORMATION:
+GCash: 0930-530-7396 (Roldan B. Tañeza)
+Please use your Church Name as reference when sending payment.
+
+IMPORTANT NOTES:
+1. Keep this email for your reference
+2. Present this confirmation during on-site registration
+3. For questions, contact:
+   - Registration: 0930-530-7396 (Roldan B. Tañeza)
+   - Event Coordinator: 0947-464-3411 (Pstr. Juanito Magbanua)
+   - Registration Inquiries: 0909-969-4993 (Sis. Fevie Ann Pati-ic)
+   - Email: yacc2025connect@gmail.com
+
+We're excited to have you at YACC 2025 – CONNECT!
+
+Best regards,
+YACC 2025 Team
+`;
+
+    MailApp.sendEmail({
+      to: data.email,
+      subject: subject,
+      body: message
+    });
+
+    // Send notification to developers
+    var developerEmails = [
+      'yacc2025connect@gmail.com'
+    ];
+    
+    var devSubject = 'New YACC 2025 Registration - ' + data.churchName;
+    var devMessage = `
+NEW REGISTRATION RECEIVED:
+
+Church Name: ${data.churchName}
+Leader: ${data.leaderName}
+Leader Age: ${data.leaderAge}
+Leader Sex: ${data.leaderSex}
+Email: ${data.email}
+Contact: ${data.contact}
+Number of Attendees: ${data.attendees}
+Region: ${data.region}
+Leader Education: ${data.leaderEducation}
+${data.leaderFb ? 'Leader Facebook: ' + data.leaderFb : ''}
+Registration ID: ${registrationId}
+Total Fee: ₱${totalFee.toFixed(2)} ${isEarlyBird ? '(Early Bird Rate)' : '(Regular Rate)'}
+Total Attendees Count: ${totalAttendeesCount}
+Timestamp: ${timestamp}
+
+REGISTERED ATTENDEES:
+${membersList}
+
+Payment Proof: ${paymentProofUrl && paymentProofUrl.includes('http') ? 'Uploaded - ' + paymentProofUrl : 'Not uploaded'}
+
+TOTAL ATTENDEES SUMMARY:
+- Churches Registered: ${newChurches}
+- Total Attendees: ${newAttendees}
+
+ACTION REQUIRED:
+1. Verify payment if proof is uploaded
+2. Confirm registration in the spreadsheet
+3. Follow up if payment proof is missing
+
+View registration details in the spreadsheet:
+https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit
+`;
+
+    // Send email to all developers
+    developerEmails.forEach(email => {
+      try {
+        MailApp.sendEmail({
+          to: email,
+          subject: devSubject,
+          body: devMessage
+        });
+      } catch (emailError) {
+        console.log("Error sending notification to developer " + email + ": " + emailError.toString());
+      }
+    });
+
+    return { success: true, message: "Registration submitted successfully!" };
+    
+  } catch (error) {
+    console.log("Error in submitRegistration: " + error.toString());
+    return { success: false, message: error.message };
+  }
+}
+
+// Test function to verify spreadsheet connection
+function testSpreadsheetConnection() {
+  try {
+    var spreadsheetId = "1FhN4LwARglRTEUJVkR26h7vlPfTNBHE3c55YZZxqvPw";
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheets = ss.getSheets();
+    var sheetNames = sheets.map(sheet => sheet.getName());
+    
+    console.log("Connected to spreadsheet successfully!");
+    console.log("Available sheets:", sheetNames);
+    
+    return {
+      success: true,
+      message: "Spreadsheet connection successful",
+      sheets: sheetNames
+    };
+  } catch (error) {
+    console.log("Error connecting to spreadsheet: " + error.toString());
+    return {
+      success: false,
+      message: "Error: " + error.message
+    };
+  }
+}
