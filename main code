@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YACC 2025 - CONNECT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All existing CSS styles remain the same */
+        :root {
+            --primary: #3B82F6;
+            --secondary: #1E3A8A;
+            --accent: #FBBF24;
+            --background: #F9FAFB;
+            --text: #111827;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            color: var(--background);
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(251,191,36,0.2)"/></svg>');
+            background-size: cover;
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-content h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-content .subtitle {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .hero-content .event-details {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--accent);
+            opacity: 0.9;
+        }
+        
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 120px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .countdown-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .countdown-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1;
+        }
+        
+        .countdown-label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .countdown-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ph-time {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+        
+        .countdown-finished .countdown-number {
+            color: var(--background);
+        }
+        
+        .ended-message {
+            display: none;
+            background-color: rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            max-width: 600px;
+        }
+        
+        .ended-message h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--background);
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            border: none;
+            cursor: pointer;
+            animation: flicker 3s infinite alternate;
+        }
+        
+        .btn:hover {
+            background-color: #2563EB;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-glow {
+            animation: flicker 2s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .countdown-container.pulse .countdown-item {
+            animation: pulse 2s infinite;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--primary);
+            position: relative;
+            animation: shake 0.5s ease;
+        }
+        
+        .modal-content h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .modal-content ul {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+        
+        .modal-content li {
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .modal-content p {
+            color: var(--text);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .modal-close {
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background-color: #2563EB;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .info-section {
+            padding: 80px 0;
+            background-color: var(--background);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+        
+        .ticket-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .ticket-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--background);
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .ticket-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .ticket-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .ticket-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+        
+        .ticket-card p {
+            margin-bottom: 15px;
+            color: var(--accent);
+            opacity: 0.9;
+        }
+        
+        .highlight {
+            background-color: var(--accent);
+            color: var(--secondary);
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        .payment-info {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background-color: var(--background);
+            border-radius: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .payment-info p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #444;
+        }
+        
+        .payment-qr {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: white;
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        
+        .payment-summary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--background);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .payment-summary h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .rate-info {
+            font-size: 1rem;
+            margin-top: 10px;
+            color: var(--accent);
+            opacity: 0.9;
+        }
+        
+        .breakdown {
+            margin-top: 20px;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .breakdown-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .breakdown-label {
+            color: var(--background);
+        }
+        
+        .breakdown-value {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .location-section {
+            padding: 80px 0;
+            background-color: var(--background);
+        }
+        
+        .location-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .location-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .location-map {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--primary);
+            color: var(--background);
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .form-section {
+            padding: 80px 0;
+            background-color: var(--background);
+        }
+        
+        .form-container {
+            background-color: var(--background);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .form-description {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-group input:invalid, 
+        .form-group select:invalid {
+            border-color: var(--primary);
+        }
+        
+        .form-section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        .member-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: var(--background);
+            border-radius: 10px;
+            position: relative;
+            align-items: flex-start;
+            transition: background-color 0.3s ease;
+        }
+        
+        .member-row .form-group {
+            flex: 1 1 200px;
+            margin-bottom: 0;
+        }
+        
+        .add-member {
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-member:hover {
+            background-color: var(--secondary);
+        }
+        
+        .submit-btn {
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            animation: flicker 3s infinite alternate;
+        }
+        
+        .submit-btn:hover {
+            background-color: #2563EB;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .error-message {
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .contact-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--background);
+            text-align: center;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .contact-icon {
+            background-color: var(--accent);
+            color: var(--secondary);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        footer {
+            background-color: var(--secondary);
+            color: var(--accent);
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .hashtags {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero-content .subtitle {
+                fontsize: 1.5rem;
+            }
+            
+            .hero-content .event-details {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .ticket-card {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .member-row {
+                flex-direction: column;
+            }
+            
+            .countdown-item {
+                min-width: 80px;
+                padding: 15px;
+            }
+            
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+            
+            .countdown-label {
+                font-size: 0.9rem;
+            }
+            
+            .countdown-message {
+                font-size: 1.2rem;
+            }
+            
+            .ended-message h2 {
+                font-size: 1.5rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            background-color: var(--background);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        .success-message h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .fire-effect {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to top, rgba(251, 191, 36, 0.4), transparent);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .remove-member {
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            align-self: flex-end;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .remove-member:hover {
+            background-color: #2563EB;
+        }
+        
+        .member-container {
+            margin-bottom: 30px;
+        }
+        
+        .file-upload {
+            margin-top: 10px;
+        }
+        
+        .map-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .member-number {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .auto-generate-notice {
+            background-color: var(--accent);
+            color: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .attendees-info {
+            background-color: var(--background);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .gcash-qr-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #00a859 0%, #006f3c 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .gcash-qr-container h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .gcash-qr-code {
+            max-width: 300px;
+            border-radius: 10px;
+            margin: 0 auto;
+            display: block;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .gcash-instructions {
+            color: white;
+            margin-top: 15px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .gcash-number {
+            background-color: white;
+            color: #00a859;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* Additional styles for payment options */
+        .payment-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .payment-option {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+        
+        .payment-option-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+    </style>
+    <base target="_top">
+</head>
+<body>
+    <div class="fire-effect"></div>
+    
+    <!-- Combined Hero and Countdown Section -->
+    <section class="hero-section" id="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Register Now for YACC 2025</h1>
+                <p class="subtitle">CONNECT</p>
+                <p class="event-details">December 26–30, 2025 | Anilao National High School, Iloilo</p>
+                <div class="countdown-container" id="countdown-container">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="days">00</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="hours">00</div>
+                        <div class="countdown-label">Hrs</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="minutes">00</div>
+                        <div class="countdown-label">Mins</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="seconds">00</div>
+                        <div class="countdown-label">Secs</div>
+                    </div>
+                </div>
+                <div class="countdown-message" id="countdown-message">
+                    Hurry! Register before November 30, 2025, 11:59 PM Philippines Time to get the early bird rate of ₱600!
+                </div>
+                <div class="ended-message" id="endedMessage">
+                    <h2>Time's Up!</h2>
+                    <p>Early bird registration has closed. Regular rate of ₱750 now applies.</p>
+                </div>
+                <div class="ph-time">
+                    Current Philippines Time: <span id="ph-time">Loading...</span>
+                </div>
+                <button class="btn btn-glow" onclick="document.getElementById('form').scrollIntoView({ behavior: 'smooth' })">Register Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Info Section -->
+    <section class="info-section" id="info">
+        <div class="container">
+            <h2 class="section-title">Registration Details</h2>
+            <div class="ticket-cards">
+                <div class="ticket-card">
+                    <h3>Pre-registration</h3>
+                    <div class="ticket-price">₱600</div>
+                    <p>Early bird rate</p>
+                    <div class="highlight">Valid until November 30, 2025</div>
+                </div>
+                <div class="ticket-card">
+                    <h3>Regular</h3>
+                    <div class="ticket-price">₱750</div>
+                    <p>Standard registration</p>
+                </div>
+                <div class="ticket-card">
+                    <h3>7 years & below</h3>
+                    <div class="ticket-price">₱350</div>
+                    <p>Special rate for young attendees</p>
+                </div>
+            </div>
+            
+            <!-- Payment Options Section -->
+            <div class="payment-options">
+                <!-- First Payment Option -->
+                
+                
+                <!-- Second Payment Option -->
+                <div class="payment-option">
+                    <div class="container">
+                        
+                       
+                        <p class="gcash-instructions">Send payment to: <strong>Roldan B. Tañeza</strong></p>
+                         <p class="gcash-instructions"><strong>0930-530-7396</strong></p>
+                        <img src="https://i.ibb.co/DPTfzcj2/secondpayment.jpg" alt="Second GCash Payment QR Code" class="gcash-qr-code">
+                        <p class="gcash-instructions">Scan the QR code above </p>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-info">
+                <h3>Payment Information</h3>
+                
+                <p>Please use your Church Name as reference when sending payment.</p>
+                <p>Upload proof of payment (JPEG or PNG) below to expedite verification.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Section -->
+    <section class="location-section" id="location">
+        <div class="container">
+            <h2 class="section-title">Event Location</h2>
+            <div class="location-content">
+                <div class="location-info">
+                    <h3>Anilao National High School</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Anilao, Iloilo, Philippines</p>
+                    <p>The 52nd Youth Annual Conference in Christ (YACC) 2025 – CONNECT will be held at Anilao National High School in Iloilo. This venue provides ample space for our gathering and activities.</p>
+                    <p><strong>Date:</strong> December 26–30, 2025</p>
+                    
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/profile.php?id=61580022176342" class="social-link" target="_blank">
+                            <i class="fab fa-facebook"></i> YACC 2025 Facebook
+                        </a>
+                        <a href="https://www.google.com/maps/dir//XP8M%2BQMX,+Badiang,+National+Hwy,+Anilao,+Iloilo/@10.9690873,122.648711,11.24z/data=!4m8!4m7!1m0!1m5!1m1!1s0x33af22a29dc7c3ef:0xb011c749c6720dcb!2m2!1d122.7342821!2d10.9669362!5m2!1e4!1e1?entry=ttu&g_ep=EgoyMDI5MTAxNC4wIKXMDSoASAFQAw%3D%3D" class="social-link" target="_blank">
+                            <i class="fas fa-directions"></i> Get Directions
+                        </a>
+                    </div>
+                </div>
+                <div class="location-map">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3912.123456789012!2d122.7342274!3d10.9669816!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33af22a29dc7c3ef%3A0xb011c749c6720dcb!2sANILAO%20NATIONAL%20HIGH%20SCHOOL!5e0!3m2!1sen!2sph!4v1234567890123!5m2!1sen!2sph" 
+                        class="map-iframe"
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Form Section -->
+    <section class="form-section" id="form">
+        <div class="container">
+            <h2 class="section-title">Registration Form</h2>
+            <div class="form-container">
+                <div class="form-description">
+                    <p>Please use this form to register your group for the 52nd Youth Annual Conference in Christ (YACC) 2025 – CONNECT.</p>
+                    <p>Fill in the group leader's information and list the names of all members joining from your church or organization.</p>
+                    <p>Upload your proof of payment (JPEG or PNG) to expedite verification.</p>
+                    <p>After submitting, you will receive an email confirmation with payment details and a link to your uploaded proof (if provided).</p>
+                    <p>If you have any questions, contact us via our YACC 2025 Connect Facebook Page or email yacc2025connect@gmail.com.</p>
+                </div>
+                
+                <form id="registrationForm">
+                    <h3 class="form-section-title">SECTION 1: Church / Group Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="church-name"> Church Name *</label>
+                            <input type="text" id="church-name" placeholder="Official name of your church" required>
+                            <div class="error-message" id="church-name-error">Church name must be at least 3 characters.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="leader-name"> Church Leader or Youth President *</label>
+                            <input type="text" id="leader-name" placeholder="Name of the main contact person" required>
+                            <div class="error-message" id="leader-name-error">Leader name must be at least 3 characters.</div>
+                        </div>
+                        
+                        <!-- Leader Age Field -->
+                        <div class="form-group">
+                            <label for="leader-age"> Leader Age *</label>
+                            <input type="number" id="leader-age" placeholder="Age of the leader" required min="1" max="99" step="1">
+                            <div class="error-message" id="leader-age-error">Age must be between 1 and 99.</div>
+                        </div>
+                        
+                        <!-- Leader Sex Field -->
+                        <div class="form-group">
+                            <label for="leader-sex"> Leader Sex *</label>
+                            <select id="leader-sex" required>
+                                <option value="" disabled selected>Select Sex</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <div class="error-message" id="leader-sex-error">Please select Male or Female.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email"> Email Address *</label>
+                            <input type="email" id="email" placeholder="Valid email for confirmation" required>
+                            <div class="error-message" id="email-error">Please enter a valid email address.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">6. Contact Number *</label>
+                            <input type="tel" id="contact" placeholder="11-digit phone number (e.g., 09123456789)" required>
+                            <div class="error-message" id="contact-error">Contact number must be exactly 11 digits.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="attendees">  Number of Attendees (including leader) *</label>
+                            <input type="number" id="attendees" placeholder="Total number including leader" required min="1" max="100">
+                            <div class="error-message" id="attendees-error">Attendees must be between 1 and 100.</div>
+                            <small style="color: var(--text); margin-top: 5px; display: block;">Enter the total number of people attending, including the leader.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="region"> Region and City / Province *</label>
+                            <input type="text" id="region" placeholder="City and province your group is from" required>
+                            <div class="error-message" id="region-error">Region must be at least 3 characters.</div>
+                        </div>
+                        <!-- Education Level Field -->
+                        <div class="form-group">
+                            <label for="leader-education"> Educational Level (Leader) *</label>
+                            <select id="leader-education" required>
+                                <option value="" disabled selected>Select Educational Level</option>
+                                <option value="Elementary">Elementary</option>
+                                <option value="High School A (First and Second Year)">High School A (First and Second Year)</option>
+                                <option value="High School B (Third and Fourth Year)">High School B (Third and Fourth Year)</option>
+                                <option value="High School C (Grade 11 and 12)">High School C (Grade 11 and 12)</option>
+                                <option value="College A (First and Second Year)">College A (First and Second Year)</option>
+                                <option value="College B (Third and Fourth Year)">College B (Third and Fourth Year)</option>
+                                <option value="Young Professional">Young Professional</option>
+                                <option value="Adults: Men, Women and Pastors Combined">Adults: Men, Women and Pastors Combined</option>
+                            </select>
+                            <div class="error-message" id="leader-education-error">Please select an educational level.</div>
+                        </div>
+                        <!-- Facebook Name Field -->
+                        <div class="form-group">
+                            <label for="leader-fb"> Facebook Name (Leader)</label>
+                            <input type="text" id="leader-fb" placeholder="Facebook name used by the leader">
+                            <div class="error-message" id="leader-fb-error">Facebook name must be at least 3 characters if provided.</div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="form-section-title">SECTION 2: Group Member Details</h3>
+                    
+                    <div class="auto-generate-notice">
+                        <i class="fas fa-info-circle"></i> Member forms will be automatically generated based on the number of attendees entered above.
+                    </div>
+                    
+                    <div class="attendees-info" id="attendees-info">
+                        <strong>Total Attendees:</strong> <span id="total-attendees">1</span> (including leader)<br>
+                        <strong>Members to register:</strong> <span id="members-count">0</span>
+                    </div>
+                    
+                    <div id="members-container" class="member-container"></div>
+                    
+                    <button type="button" class="add-member" id="add-member" style="display: none;">
+                        <i class="fas fa-plus"></i> Add Additional Member
+                    </button>
+                    
+                    <!-- Payment Summary Section -->
+                    <div class="payment-summary" id="payment-summary">
+                        <h3>Payment Summary</h3>
+                        <div class="total-amount">Total: ₱<span id="total-amount">0</span></div>
+                        <div class="rate-info" id="rate-info">Early Bird Rate (₱600 per adult, ₱350 for 7 years & below)</div>
+                        <div class="breakdown" id="breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Leader:</span>
+                                <span class="breakdown-value">₱600</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Members:</span>
+                                <span class="breakdown-value">₱0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Children (7 & below):</span>
+                                <span class="breakdown-value">₱0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group file-upload">
+                        <label for="file-upload">Proof of Payment Upload (JPEG or PNG) *</label>
+                        <input type="file" id="file-upload" accept="image/jpeg,image/png" required>
+                        <div class="error-message" id="file-upload-error">Only JPEG or PNG files up to 5MB are allowed.</div>
+                        <small>Use this to upload your GCash payment proof. Ensure it includes your Church Name as reference.</small>
+                    </div>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Submitting your registration...</p>
+                    </div>
+                    
+                    <button type="button" class="submit-btn" id="submit-btn">Submit Registration</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Success Message -->
+    <div class="success-message" id="success-message">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h2>Registration Submitted Successfully!</h2>
+        <p>Thank you for registering for YACC 2025 - CONNECT.</p>
+        <p>Check your email for confirmation and payment details.</p>
+        <p><strong>Venue:</strong> Anilao National High School, Iloilo</p>
+        <p><strong>Date:</strong> December 26–30, 2025</p>
+        <button class="btn" onclick="location.reload()">Register Another Group</button>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal" id="error-modal">
+        <div class="modal-content">
+            <h3>Form Errors</h3>
+            <ul id="error-list"></ul>
+            <button class="modal-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Payment Missing Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <h3>Payment Required</h3>
+            <p>You have not yet uploaded proof of payment. Please upload a JPEG or PNG file to proceed.</p>
+            <button class="modal-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <p>yacc2025connect@gmail.com</p>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <p>0930-530-7396</p>
+                    <p>Bro. Roldan B. Tañeza</p>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <p>0947-464-3411</p>
+                    <p>Pstr. Juanito Magbanua</p>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <p>0909-969-4993</p>
+                    <p>Sis. Fevie Ann Pati-ic</p>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fab fa-facebook"></i></div>
+                    <p>YACC 2025 Connect</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="hashtags">#YACC2025 #CONNECT</p>
+            <p>&copy; 2025 YACC Panay. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Update Philippines time
+        function updatePhilippinesTime() {
+            const options = {
+                timeZone: 'Asia/Manila',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const parts = formatter.formatToParts(new Date());
+            
+            let month, day, year, hour, minute, second, dayPeriod;
+            for (const part of parts) {
+                switch (part.type) {
+                    case 'month': month = part.value; break;
+                    case 'day': day = part.value; break;
+                    case 'year': year = part.value; break;
+                    case 'hour': hour = part.value; break;
+                    case 'minute': minute = part.value; break;
+                    case 'second': second = part.value; break;
+                    case 'dayPeriod': dayPeriod = part.value; break;
+                }
+            }
+            
+            const phTimeString = `${month}/${day}/${year}, ${hour}:${minute}:${second} ${dayPeriod}`;
+            document.getElementById('ph-time').textContent = phTimeString;
+        }
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('2025-11-30T23:59:59+08:00');
+            const now = new Date();
+            const distance = targetDate - now;
+
+            updatePhilippinesTime();
+
+            if (distance < 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                document.getElementById('endedMessage').style.display = 'block';
+                document.getElementById('countdown-message').style.display = 'none';
+                document.querySelector('.hero-section').classList.add('countdown-finished');
+                document.getElementById('countdown-container').classList.remove('pulse');
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+            if (days < 7) {
+                document.getElementById('countdown-container').classList.add('pulse');
+            }
+
+            let message = `Hurry! Register before November 30, 2025, 11:59 PM Philippines Time to get the early bird rate of ₱600!`;
+            if (days <= 1) {
+                message = `🔥 <strong>${days === 0 ? 'Final hours!' : 'Last day!'}</strong> Register now to get the early bird rate of ₱600!`;
+            } else if (days < 7) {
+                message = `🚨 <strong>${days} days left!</strong> Register before November 30, 2025, 11:59 PM Philippines Time to get the early bird rate of ₱600!`;
+            }
+            document.getElementById('countdown-message').innerHTML = message;
+        }
+
+        function initializeCountdown() {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeCountdown);
+
+        // Validation Functions
+        function validateChurchName(value) {
+            return value && value.trim().length >= 3;
+        }
+
+        function validateLeaderName(value) {
+            return value && value.trim().length >= 3;
+        }
+
+        function validateLeaderAge(value) {
+            if (!value || value.toString().trim() === '') return false;
+            const num = parseInt(value);
+            return !isNaN(num) && num >= 1 && num <= 99;
+        }
+
+        function validateLeaderSex(value) {
+            return value && ["Male", "Female"].includes(value.toString().trim());
+        }
+
+        function validateEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+
+        function validateContact(value) {
+            const cleaned = value.replace(/[-\s+]/g, '');
+            return /^\d{11}$/.test(cleaned);
+        }
+
+        function validateAttendees(value) {
+            const num = parseInt(value);
+            return !isNaN(num) && num >= 1 && num <= 100;
+        }
+
+        function validateRegion(value) {
+            return value && value.trim().length >= 3;
+        }
+
+        function validateLeaderEducation(value) {
+            const validEducationLevels = [
+                "Elementary", 
+                "High School A (First and Second Year)", 
+                "High School B (Third and Fourth Year)", 
+                "High School C (Grade 11 and 12)", 
+                "College A (First and Second Year)", 
+                "College B (Third and Fourth Year)", 
+                "Young Professional", 
+                "Adults: Men, Women and Pastors Combined"
+            ];
+            return value && validEducationLevels.includes(value);
+        }
+
+        function validateLeaderFb(value) {
+            return !value || value.trim().length >= 3;
+        }
+
+        function validateMemberName(value) {
+            return value && value.trim().length >= 3;
+        }
+
+        function validateMemberAge(value) {
+            if (!value || value.toString().trim() === '') return false;
+            const num = parseInt(value);
+            return !isNaN(num) && num >= 1 && num <= 99;
+        }
+
+        function validateMemberSex(value) {
+            return value && ["Male", "Female"].includes(value);
+        }
+
+        function validateMemberEdu(value) {
+            const validEducationLevels = [
+               
+                "Elementary", 
+                "High School A (First and Second Year)", 
+                "High School B (Third and Fourth Year)", 
+                "High School C (Grade 11 and 12)", 
+                "College A (First and Second Year)", 
+                "College B (Third and Fourth Year)", 
+                "Young Professional", 
+                "Adults: Men, Women and Pastors Combined"
+            ];
+            return value && validEducationLevels.includes(value);
+        }
+
+        function validateMemberFb(value) {
+            return !value || value.trim().length >= 3;
+        }
+
+        function validateFile(file) {
+            if (!file) return false;
+            const validTypes = ['image/jpeg', 'image/png'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            return validTypes.includes(file.type) && file.size <= maxSize;
+        }
+
+        // Modal Functions
+        function showErrorModal(errors) {
+            const modal = document.getElementById('error-modal');
+            const errorList = document.getElementById('error-list');
+            errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+            modal.style.display = 'flex';
+        }
+
+        function showPaymentModal() {
+            const modal = document.getElementById('payment-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('error-modal').style.display = 'none';
+            document.getElementById('payment-modal').style.display = 'none';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('error-modal') || e.target === document.getElementById('payment-modal')) {
+                closeModal();
+            }
+        });
+
+        // Dynamic member fields
+        let memberCount = 0;
+        const membersContainer = document.getElementById('members-container');
+        const addMemberBtn = document.getElementById('add-member');
+        const attendeesInput = document.getElementById('attendees');
+
+        // Payment calculation functions
+        function isEarlyBird() {
+            const targetDate = new Date('2025-11-30T23:59:59+08:00');
+            const now = new Date();
+            return now <= targetDate;
+        }
+
+        function calculateTotalFee() {
+            const earlyBird = isEarlyBird();
+            const adultRate = earlyBird ? 600 : 750;
+            const childRate = 350;
+            
+            // Calculate leader fee based on age (child or adult pricing)
+            const leaderAge = parseInt(document.getElementById('leader-age').value) || 0;
+            let totalFee = leaderAge <= 7 ? childRate : adultRate;
+            
+            // Count members and their ages
+            const memberRows = document.querySelectorAll('.member-row');
+            let adultCount = 0;
+            let childCount = 0;
+            
+            memberRows.forEach(row => {
+                const ageInput = row.querySelector('input[type="number"]');
+                if (ageInput && ageInput.value) {
+                    const age = parseInt(ageInput.value);
+                    if (age <= 7) {
+                        childCount++;
+                    } else {
+                        adultCount++;
+                    }
+                } else {
+                    adultCount++;
+                }
+            });
+            
+            // Calculate total
+            totalFee += (adultCount * adultRate) + (childCount * childRate);
+            
+            // Update display
+            document.getElementById('total-amount').textContent = totalFee;
+            
+            // Update rate info
+            const rateInfo = document.getElementById('rate-info');
+            if (earlyBird) {
+                rateInfo.textContent = `Early Bird Rate (₱${adultRate} per adult, ₱${childRate} for 7 years & below)`;
+            } else {
+                rateInfo.textContent = `Regular Rate (₱${adultRate} per adult, ₱${childRate} for 7 years & below)`;
+            }
+            
+            // Update breakdown
+            const breakdown = document.getElementById('breakdown');
+            breakdown.innerHTML = `
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Leader:</span>
+                    <span class="breakdown-value">₱${leaderAge <= 7 ? childRate : adultRate}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Adult Members:</span>
+                    <span class="breakdown-value">₱${adultCount * adultRate}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Children (7 & below):</span>
+                    <span class="breakdown-value">₱${childCount * childRate}</span>
+                </div>
+            `;
+            
+            return totalFee;
+        }
+
+        function createMemberRow(memberNumber) {
+            const memberRow = document.createElement('div');
+            memberRow.classList.add('member-row');
+            memberRow.innerHTML = `
+                <div class="member-header">
+                    <div class="member-number">Member ${memberNumber}</div>
+                </div>
+                <div class="form-group">
+                    <label> Full Name *</label>
+                    <input type="text" placeholder="Full name of the group member" required>
+                    <div class="error-message">Name must be at least 3 characters.</div>
+                </div>
+                <div class="form-group">
+                    <label> Age *</label>
+                    <input type="number" placeholder="Age of the member" required min="1" max="99" class="age-input" step="1">
+                    <div class="error-message">Age must be between 1 and 99.</div>
+                </div>
+                <div class="form-group">
+                    <label> Sex *</label>
+                    <select required>
+                        <option value="" disabled selected>Select Sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <div class="error-message">Please select Male or Female.</div>
+                </div>
+                <div class="form-group">
+                    <label> Educational Level *</label>
+                    <select required>
+                        <option value="" disabled selected>Select Educational Level</option>
+                        <option value="Nursery/Kinder">Nursery/Kinder</option>
+                        <option value="Elementary">Elementary</option>
+                        <option value="High School A (First and Second Year)">High School A (First and Second Year)</option>
+                        <option value="High School B (Third and Fourth Year)">High School B (Third and Fourth Year)</option>
+                        <option value="High School C (Grade 11 and 12)">High School C (Grade 11 and 12)</option>
+                        <option value="College A (First and Second Year)">College A (First and Second Year)</option>
+                        <option value="College B (Third and Fourth Year)">College B (Third and Fourth Year)</option>
+                        <option value="Young Professional">Young Professional</option>
+                        <option value="Adults: Men, Women and Pastors Combined">Adults: Men, Women and Pastors Combined</option>
+                    </select>
+                    <div class="error-message">Please select an educational level.</div>
+                </div>
+                <div class="form-group">
+                    <label> Facebook Name</label>
+                    <input type="text" placeholder="Facebook name used by the member">
+                    <div class="error-message">Facebook name must be at least 3 characters if provided.</div>
+                </div>
+                <button type="button" class="remove-member"><i class="fas fa-trash"></i> Remove</button>
+            `;
+            
+            // Add event listener for age input to update payment calculation
+            const ageInput = memberRow.querySelector('.age-input');
+            ageInput.addEventListener('input', calculateTotalFee);
+            
+            memberRow.querySelector('.remove-member').addEventListener('click', () => {
+                memberRow.remove();
+                updateAttendeesInfo();
+                updateMemberNumbers();
+                calculateTotalFee();
+            });
+
+            return memberRow;
+        }
+
+        function generateMemberForms(totalAttendees) {
+            membersContainer.innerHTML = '';
+            memberCount = 0;
+            const numberOfMembers = Math.max(0, totalAttendees - 1);
+            for (let i = 0; i < numberOfMembers; i++) {
+                memberCount++;
+                const memberRow = createMemberRow(memberCount);
+                membersContainer.appendChild(memberRow);
+            }
+            updateAttendeesInfo();
+            calculateTotalFee();
+        }
+
+        function updateAttendeesInfo() {
+            const totalAttendees = parseInt(attendeesInput.value) || 1;
+            const memberRows = document.querySelectorAll('.member-row');
+            const numberOfMembers = memberRows.length;
+            document.getElementById('total-attendees').textContent = totalAttendees;
+            document.getElementById('members-count').textContent = numberOfMembers;
+            addMemberBtn.style.display = numberOfMembers < totalAttendees - 1 ? 'flex' : 'none';
+        }
+
+        function updateMemberNumbers() {
+            const memberRows = document.querySelectorAll('.member-row');
+            memberRows.forEach((row, index) => {
+                const memberNumber = row.querySelector('.member-number');
+                if (memberNumber) {
+                    memberNumber.textContent = `Member ${index + 1}`;
+                }
+            });
+            memberCount = memberRows.length;
+            updateAttendeesInfo();
+        }
+
+        addMemberBtn.addEventListener('click', () => {
+            const totalAttendees = parseInt(attendeesInput.value) || 1;
+            const currentMembers = document.querySelectorAll('.member-row').length;
+            if (currentMembers < totalAttendees - 1) {
+                memberCount++;
+                const memberRow = createMemberRow(memberCount);
+                membersContainer.appendChild(memberRow);
+                updateAttendeesInfo();
+                calculateTotalFee();
+            }
+        });
+
+        attendeesInput.addEventListener('input', function() {
+            const totalAttendees = parseInt(this.value) || 1;
+            if (totalAttendees < 1) {
+                this.value = 1;
+                document.getElementById('attendees-error').style.display = 'block';
+                return;
+            }
+            if (totalAttendees > 100) {
+                this.value = 100;
+                document.getElementById('attendees-error').style.display = 'block';
+                return;
+            }
+            document.getElementById('attendees-error').style.display = 'none';
+            generateMemberForms(totalAttendees);
+        });
+
+        // Add event listener for leader age to update payment calculation
+        document.getElementById('leader-age').addEventListener('input', calculateTotalFee);
+
+        // Initialize with 1 attendee
+        generateMemberForms(1);
+
+        // Submit function
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            let valid = true;
+            const errors = [];
+
+            // Validate group fields
+            const churchName = document.getElementById('church-name');
+            if (!validateChurchName(churchName.value)) {
+                churchName.style.borderColor = 'red';
+                document.getElementById('church-name-error').style.display = 'block';
+                errors.push('Church name must be at least 3 characters.');
+                valid = false;
+            } else {
+                churchName.style.borderColor = '';
+                document.getElementById('church-name-error').style.display = 'none';
+            }
+
+            const leaderName = document.getElementById('leader-name');
+            if (!validateLeaderName(leaderName.value)) {
+                leaderName.style.borderColor = 'red';
+                document.getElementById('leader-name-error').style.display = 'block';
+                errors.push('Leader name must be at least 3 characters.');
+                valid = false;
+            } else {
+                leaderName.style.borderColor = '';
+                document.getElementById('leader-name-error').style.display = 'none';
+            }
+
+            const leaderAge = document.getElementById('leader-age');
+            if (!validateLeaderAge(leaderAge.value)) {
+                leaderAge.style.borderColor = 'red';
+                document.getElementById('leader-age-error').style.display = 'block';
+                errors.push('Leader age must be a valid number between 1 and 99.');
+                valid = false;
+            } else {
+                leaderAge.style.borderColor = '';
+                document.getElementById('leader-age-error').style.display = 'none';
+            }
+
+            const leaderSex = document.getElementById('leader-sex');
+            if (!validateLeaderSex(leaderSex.value)) {
+                leaderSex.style.borderColor = 'red';
+                document.getElementById('leader-sex-error').style.display = 'block';
+                errors.push('Please select leader sex (Male or Female).');
+                valid = false;
+            } else {
+                leaderSex.style.borderColor = '';
+                document.getElementById('leader-sex-error').style.display = 'none';
+            }
+
+            const email = document.getElementById('email');
+            if (!validateEmail(email.value)) {
+                email.style.borderColor = 'red';
+                document.getElementById('email-error').style.display = 'block';
+                errors.push('Please enter a valid email address.');
+                valid = false;
+            } else {
+                email.style.borderColor = '';
+                document.getElementById('email-error').style.display = 'none';
+            }
+
+            const contact = document.getElementById('contact');
+            if (!validateContact(contact.value)) {
+                contact.style.borderColor = 'red';
+                document.getElementById('contact-error').style.display = 'block';
+                errors.push('Contact number must be exactly 11 digits.');
+                valid = false;
+            } else {
+                contact.style.borderColor = '';
+                document.getElementById('contact-error').style.display = 'none';
+            }
+
+            const attendees = document.getElementById('attendees');
+            if (!validateAttendees(attendees.value)) {
+                attendees.style.borderColor = 'red';
+                document.getElementById('attendees-error').style.display = 'block';
+                errors.push('Number of attendees must be between 1 and 100.');
+                valid = false;
+            } else {
+                attendees.style.borderColor = '';
+                document.getElementById('attendees-error').style.display = 'none';
+            }
+
+            const region = document.getElementById('region');
+            if (!validateRegion(region.value)) {
+                region.style.borderColor = 'red';
+                document.getElementById('region-error').style.display = 'block';
+                errors.push('Region must be at least 3 characters.');
+                valid = false;
+            } else {
+                region.style.borderColor = '';
+                document.getElementById('region-error').style.display = 'none';
+            }
+
+            const leaderEducation = document.getElementById('leader-education');
+            if (!validateLeaderEducation(leaderEducation.value)) {
+                leaderEducation.style.borderColor = 'red';
+                document.getElementById('leader-education-error').style.display = 'block';
+                errors.push('Please select an educational level for the leader.');
+                valid = false;
+            } else {
+                leaderEducation.style.borderColor = '';
+                document.getElementById('leader-education-error').style.display = 'none';
+            }
+
+            const leaderFb = document.getElementById('leader-fb');
+            if (!validateLeaderFb(leaderFb.value)) {
+                leaderFb.style.borderColor = 'red';
+                document.getElementById('leader-fb-error').style.display = 'block';
+                errors.push('Facebook name must be at least 3 characters if provided.');
+                valid = false;
+            } else {
+                leaderFb.style.borderColor = '';
+                document.getElementById('leader-fb-error').style.display = 'none';
+            }
+
+            // Validate member fields
+            const memberRows = document.querySelectorAll('.member-row');
+            memberRows.forEach((row, index) => {
+                const inputs = row.querySelectorAll('input, select');
+                const errorsDivs = row.querySelectorAll('.error-message');
+
+                if (!validateMemberName(inputs[0].value)) {
+                    inputs[0].style.borderColor = 'red';
+                    errorsDivs[0].style.display = 'block';
+                    errors.push(`Member ${index + 1}: Name must be at least 3 characters.`);
+                    valid = false;
+                } else {
+                    inputs[0].style.borderColor = '';
+                    errorsDivs[0].style.display = 'none';
+                }
+
+                if (!validateMemberAge(inputs[1].value)) {
+                    inputs[1].style.borderColor = 'red';
+                    errorsDivs[1].style.display = 'block';
+                    errors.push(`Member ${index + 1}: Age must be between 1 and 99.`);
+                    valid = false;
+                } else {
+                    inputs[1].style.borderColor = '';
+                    errorsDivs[1].style.display = 'none';
+                }
+
+                if (!validateMemberSex(inputs[2].value)) {
+                    inputs[2].style.borderColor = 'red';
+                    errorsDivs[2].style.display = 'block';
+                    errors.push(`Member ${index + 1}: Please select Male or Female.`);
+                    valid = false;
+                } else {
+                    inputs[2].style.borderColor = '';
+                    errorsDivs[2].style.display = 'none';
+                }
+
+                if (!validateMemberEdu(inputs[3].value)) {
+                    inputs[3].style.borderColor = 'red';
+                    errorsDivs[3].style.display = 'block';
+                    errors.push(`Member ${index + 1}: Please select an educational level.`);
+                    valid = false;
+                } else {
+                    inputs[3].style.borderColor = '';
+                    errorsDivs[3].style.display = 'none';
+                }
+
+                if (!validateMemberFb(inputs[4].value)) {
+                    inputs[4].style.borderColor = 'red';
+                    errorsDivs[4].style.display = 'block';
+                    errors.push(`Member ${index + 1}: Facebook name must be at least 3 characters if provided.`);
+                    valid = false;
+                } else {
+                    inputs[4].style.borderColor = '';
+                    errorsDivs[4].style.display = 'none';
+                }
+            });
+
+            const totalAttendees = parseInt(attendees.value);
+            if (memberRows.length !== totalAttendees - 1) {
+                errors.push(`Please enter details for all ${totalAttendees - 1} member(s). You currently have ${memberRows.length} member(s) registered.`);
+                valid = false;
+            }
+
+            // Validate file upload
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            if (!file) {
+                showPaymentModal();
+                return;
+            }
+            if (!validateFile(file)) {
+                fileInput.style.borderColor = 'red';
+                document.getElementById('file-upload-error').style.display = 'block';
+                errors.push('Proof of payment must be a JPEG or PNG file up to 5MB.');
+                valid = false;
+            } else {
+                fileInput.style.borderColor = '';
+                document.getElementById('file-upload-error').style.display = 'none';
+            }
+
+            if (!valid) {
+                showErrorModal(errors);
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('submit-btn').disabled = true;
+
+            // Data collection with proper type conversion
+            const data = {
+                churchName: churchName.value.trim(),
+                leaderName: leaderName.value.trim(),
+                leaderAge: parseInt(leaderAge.value),
+                leaderSex: leaderSex.value,
+                email: email.value.trim(),
+                contact: contact.value.trim(),
+                attendees: parseInt(attendees.value),
+                region: region.value.trim(),
+                leaderEducation: leaderEducation.value,
+                leaderFb: leaderFb.value ? leaderFb.value.trim() : '',
+                members: [],
+                timestamp: new Date().toISOString()
+            };
+
+            memberRows.forEach(member => {
+                const inputs = member.querySelectorAll('input, select');
+                data.members.push({
+                    name: inputs[0].value.trim(),
+                    age: parseInt(inputs[1].value),
+                    sex: inputs[2].value,
+                    edu: inputs[3].value,
+                    fb: inputs[4].value ? inputs[4].value.trim() : ''
+                });
+            });
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                data.fileContent = e.target.result;
+                data.fileName = file.name;
+                data.fileType = file.type;
+                
+                // Submit to Google Apps Script
+                google.script.run
+                    .withSuccessHandler(handleSuccess)
+                    .withFailureHandler(handleFailure)
+                    .submitRegistration(data);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function handleSuccess(result) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('submit-btn').disabled = false;
+            
+            if (result.success) {
+                document.getElementById('form').style.display = 'none';
+                document.getElementById('success-message').style.display = 'block';
+                document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                showErrorModal([result.message]);
+            }
+        }
+
+        function handleFailure(error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('submit-btn').disabled = false;
+            showErrorModal(['An error occurred while submitting your registration. Please try again or contact yacc2025connect@gmail.com.']);
+            console.error('Submission error:', error);
+        }
+    </script>
+</body>
+</html>
